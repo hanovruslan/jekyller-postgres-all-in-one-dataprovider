@@ -10,7 +10,7 @@ default_ratio: 16x9
 default_lang: en
 
 presentation:
-    title: С чего начинается автоматизация
+    title: Postgres как универсальный провайдер данных
     nda: false
     lang: ru
 
@@ -21,5 +21,5 @@ author:
         name: Яндекс
         url:  http://yandex.ru/
 
-fork_url: https://github.yandex-team.ru/evolaze/jekyller
+fork_url: https://github.com/hanovruslan/jekyller-postgres-all-in-one-dataprovider
 progress: false
