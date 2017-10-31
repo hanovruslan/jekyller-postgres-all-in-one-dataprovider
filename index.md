@@ -245,19 +245,16 @@ class UserProvider {
 class UserProvider {
     public function findAll(): array {
         $find = function () {
-            return $this->entityManager
-                ->getRepository(User::class)
+            return $this->entityManager->getRepository(User::class)
                 ->findAll();
         };
         $serialize = function (array $array) {
-            $result = [];
             foreach ($array as $item) {
                 $result[] = serialize($item);
             }
             return $result;
         };
         $unserialize = function (array $array) {
-            $result = [];
             foreach ($array as $item) {
                 $result[] = unserialize($item);
             }
@@ -275,11 +272,8 @@ class UserProvider {
 ## Замечания
 
 1. {:.next}Предсказуемо работает только ORM
-1. {:.next}Проверенное временем только ORM
+1. {:.next}Полнота функционала только ORM
 1. {:.next}Путаница в параметрах при работе с несколькими Entity Manager
-
-## В основе все равно остаётся схема
-{:.blockquote}
 
 ## Что имеем
 
@@ -288,6 +282,9 @@ class UserProvider {
 **nosql - в формате jsonb**
 
 **cache - в формате blob**
+
+## В основе все равно остаётся схема
+{:.blockquote}
 
 ## Вопросы?
 {:.contacts}
