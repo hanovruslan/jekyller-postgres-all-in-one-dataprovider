@@ -109,7 +109,7 @@ style: |
 {:.section}
 
 ## docker-compose.yml, dbs
-{:.fullscreen}
+{:.fullscreen.pre-small}
 ```
 services:
     keyvalue:
