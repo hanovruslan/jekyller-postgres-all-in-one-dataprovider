@@ -36,6 +36,10 @@ style: |
 
 **Разные виды данных**
 
+**Eventual consistency**
+
+**Несколько видов баз данных**
+
 ## Типы данных
 
 - {:.next}Структурированные данные со схемой
@@ -80,7 +84,7 @@ style: |
 
 ## Message queue
 
-**mq-сервису только на базе postgres+php**{:.slide-red.next}
+**MQ-сервис только на базе postgres+php - пока рано**{:.slide-red.next}
 
 ### Увы, но пока нет
 
@@ -107,26 +111,79 @@ style: |
 - Миграции
 - Фикстуры
 
-## Реализация
+## Реализация соединения
 
-**Каждому типу данных - свое соедение**
+**Каждому типу данных - свое соединение**
 
+**Каждому типу данных - свой маппинг**
+
+**Каждому типу данных - свой миграции**
+
+## Реализация соединения
+{:.fullscreen}
 ```yaml
 doctrine:
     dbal:
         default_connection: orm
         connections:
             keyvalue:
-                driver:   pdo_pgsql
                 host:     "%keyvalue_host%"
                 port:     "%keyvalue_port%"
             orm:
-                driver:   pdo_pgsql
                 host:     "%orm_host%"
                 port:     "%orm_port%"
+            odm:
+                host:     "%odm_host%"
+                port:     "%odm_port%"
 ```
 
-##В основе все равно остаётся схема
+## Реализация маппинга
+{:.fullscreen}
+```yaml
+doctrine:
+    orm:
+        entity_managers:
+            keyvalue:
+                connection: keyvalue
+                mappings:
+                    Keyvalue:
+                        dir: src/AppBundle/Entity/Keyvalue
+            odm:
+                connection: odm
+                mappings:
+                    Odm:
+                        dir: src/AppBundle/Entity/Odm
+            orm:
+                connection: orm
+                mappings:
+                    Orm:
+                        dir: src/AppBundle/Entity/Orm
+```
+
+## Тип данных Orm
+{:.fullscreen}
+```php
+<?php
+
+/**
+ * @ORM\Entity @ORM\Table(name="uzer")
+ */
+class Uzer implements UserInterface, Serializable
+{
+    /**
+     * @ORM\Id @ORM\GeneratedValue(strategy="AUTO")
+     */
+    protected $id;
+
+    /** @ORM\Column(unique=true) */
+    protected $username;
+
+    /** @ORM\Column(unique=true) */
+    protected $token;
+}
+```
+
+## В основе все равно остаётся схема
 {:.blockquote}
 
 ## Что имеем
