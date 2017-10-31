@@ -118,18 +118,18 @@ services:
             POSTGRES_PASSWORD: keyvalue
             POSTGRES_USER: keyvalue
         hostname: keyvalue
-    orm:
-        image: postgres:10
-        environment:
-            POSTGRES_PASSWORD: orm
-            POSTGRES_USER: orm
-        hostname: orm
     odm:
         image: postgres:10
         environment:
             POSTGRES_PASSWORD: odm
             POSTGRES_USER: odm
         hostname: odm
+    orm:
+        image: postgres:10
+        environment:
+            POSTGRES_PASSWORD: orm
+            POSTGRES_USER: orm
+        hostname: orm
 ```
 
 ## docker-compose.yml, front + back
@@ -139,8 +139,6 @@ services:
     back:
         build: ./php-fpm
         depends_on: ["keyvalue", "odm", "orm"]
-        ports:
-            - "9000:9000"
         volumes:
             - ./../symfony:/usr/share/symfony
     front:
