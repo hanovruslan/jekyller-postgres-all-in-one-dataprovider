@@ -32,6 +32,13 @@ style: |
 
 **Использовать только одну базу данных в приложении**
 
+## План
+
+- {:.next}О реальности
+- {:.next}Описание эксперимента
+- {:.next}Реализация
+- {:.next}Заключение
+
 ## Особенности современного приложения
 
 **Разные виды данных**
@@ -44,9 +51,9 @@ style: |
 
 - {:.next}Структурированные данные со схемой
 - {:.next}Структурированные данные без схемы
-- {:.next}Произвольные данные
+- {:.next}Неструктурированные данные
 
-## Поток данных
+## Потоки данных
 
 - {:.next}Перекладываем байтики
 - {:.next}Порождаем события
@@ -57,13 +64,17 @@ style: |
 - {:.next}NoSQL
 - {:.next}Key-Value
 - {:.next}MQ
+- {:.next}Разное
 
 ## Доступ к данным
 
 1. Хранилище
 1. Структура
 
-## Инструменты
+## Эксперимент
+{:.section}
+
+## Основа
 
 1. Postgres
 1. Symfony 3
@@ -81,6 +92,21 @@ style: |
 
 1. Структура данных
 2. Обработка данных
+
+## Symfony 3
+
+**Dependency injection**
+
+## Песочница
+
+- Github
+- Vagrant
+- Docker + Compose
+- PHP 7.1
+- PhpStorm
+
+## Реализация
+{:.section}
 
 ## Message queue
 
@@ -111,13 +137,13 @@ style: |
 - Миграции
 - Фикстуры
 
-## Реализация соединения
+## Работа с разными типами данных
 
 **Каждому типу данных - свое соединение**
 
 **Каждому типу данных - свой маппинг**
 
-**Каждому типу данных - свой миграции**
+**Каждому типу данных - свои миграции**
 
 ## Реализация соединения
 {:.fullscreen}
@@ -132,9 +158,6 @@ doctrine:
             orm:
                 host:     "%orm_host%"
                 port:     "%orm_port%"
-            odm:
-                host:     "%odm_host%"
-                port:     "%odm_port%"
 ```
 
 ## Реализация маппинга
@@ -148,11 +171,6 @@ doctrine:
                 mappings:
                     Keyvalue:
                         dir: src/AppBundle/Entity/Keyvalue
-            odm:
-                connection: odm
-                mappings:
-                    Odm:
-                        dir: src/AppBundle/Entity/Odm
             orm:
                 connection: orm
                 mappings:
@@ -165,10 +183,8 @@ doctrine:
 ```php
 <?php
 
-/**
- * @ORM\Entity @ORM\Table(name="uzer")
- */
-class Uzer implements UserInterface, Serializable
+/** @ORM\Entity @ORM\Table */
+class User implements UserInterface, Serializable
 {
     /**
      * @ORM\Id @ORM\GeneratedValue(strategy="AUTO")
@@ -182,6 +198,85 @@ class Uzer implements UserInterface, Serializable
     protected $token;
 }
 ```
+
+## Тип данных Odm
+{:.fullscreen}
+```php
+<?php
+
+/** @ORM\Entity @ORM\Table */
+class Message
+{
+    /** @ORM\Id @ORM\GeneratedValue(strategy="AUTO") */
+    protected $id;
+
+    /** @ORM\Column(type="json_document", options={"jsonb": true}) */
+    protected $body;
+}
+```
+
+## Провайдер данных Orm + Key-Value
+{:.fullscreen}
+```php
+<?php
+
+class UserProvider {
+    /** @var EntityManager */
+    private $entityManager;
+
+    /** @var KeyvalueProvider */
+    private $cacheProvider;
+
+    public function __construct(
+        EntityManager $entityManager,
+        KeyvalueProvider $cacheProvider
+    ) {
+        $this->entityManager = $entityManager;
+        $this->cacheProvider = $cacheProvider;
+    }
+}
+
+```
+
+## Провайдер данных Orm + Key-Value
+{:.fullscreen.pre-small}
+```php
+<?php
+class UserProvider {
+    public function findAll(): array {
+        $find = function () {
+            return $this->entityManager
+                ->getRepository(User::class)
+                ->findAll();
+        };
+        $serialize = function (array $array) {
+            $result = [];
+            foreach ($array as $item) {
+                $result[] = serialize($item);
+            }
+            return $result;
+        };
+        $unserialize = function (array $array) {
+            $result = [];
+            foreach ($array as $item) {
+                $result[] = unserialize($item);
+            }
+            return $result;
+        };
+        return $this->cacheProvider
+            ->getOrRefresh('users', $find, $serialize, $unserialize);
+    }
+}
+```
+
+## Заключение
+{:.section}
+
+## Замечания
+
+1. {:.next}Предсказуемо работает только ORM
+1. {:.next}Проверенное временем только ORM
+1. {:.next}Путаница в параметрах при работе с несколькими Entity Manager
 
 ## В основе все равно остаётся схема
 {:.blockquote}
