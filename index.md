@@ -199,7 +199,7 @@ class User
 }
 ```
 
-## Тип данных Odm
+## Тип данных Odm, 1
 {:.fullscreen}
 ```php
 <?php
@@ -210,9 +210,19 @@ class Message
     /** @ORM\Id @ORM\GeneratedValue(strategy="AUTO") */
     protected $id;
 
-    /** @ORM\Column(type="json_document", options={"jsonb": true}) */
+    /**
+     * @ORM\Column(type="json_document", options={"jsonb": true})
+     * @var mixed|MessageBody
+     */
     protected $body;
 }
+```
+
+## Тип данных Odm, 2
+{:.fullscreen}
+```php
+<?php
+
 class MessageBody {
     public $title;
 
@@ -220,6 +230,34 @@ class MessageBody {
 
     public $createdAt;
 }
+```
+
+## Провайдеры данных
+
+1. Orm + Key-Value
+1. Odm
+
+**Key-Value работает напрямую с PDO**
+
+**Key-Value - реализация PSR-6**
+
+## Провайдер данных Key-Value, особенность миграции
+{:.fullscreen}
+```php
+<?php
+
+class Version20171030215522 {
+    public function up(Schema $schema) {
+        /** @var PdoAdapter $pdoAdapter */
+        $pdoAdapter = $this->container->get('app.cache.adapter.pdo');
+        $pdoAdapter->createTable();
+    }
+
+    public function down(Schema $schema) {
+        // empty
+    }
+}
+
 ```
 
 ## Провайдер данных Orm + Key-Value
@@ -268,7 +306,6 @@ class UserProvider {
         };
         return $this->cacheProvider
             ->getOrRefresh('users', $find, $serialize, $unserialize);
-}
 
 ```
 
@@ -294,8 +331,8 @@ class User implements Serializable {
 }
 ```
 
-## Провайдер данных Key-Value, getOrRefresh
-{:.fullscreen}
+## Провайдер данных Key-Value, взять или обновить
+{:.fullscreen.pre-small}
 ```php
 <?php
 
