@@ -184,7 +184,7 @@ doctrine:
 <?php
 
 /** @ORM\Entity @ORM\Table */
-class User implements UserInterface, Serializable
+class User
 {
     /**
      * @ORM\Id @ORM\GeneratedValue(strategy="AUTO")
@@ -213,6 +213,13 @@ class Message
     /** @ORM\Column(type="json_document", options={"jsonb": true}) */
     protected $body;
 }
+class MessageBody {
+    public $title;
+
+    public $text;
+
+    public $createdAt;
+}
 ```
 
 ## Провайдер данных Orm + Key-Value
@@ -238,11 +245,10 @@ class UserProvider {
 
 ```
 
-## Провайдер данных Orm + Key-Value
+## Провайдер данных Orm + Key-Value, выборка
 {:.fullscreen.pre-small}
 ```php
 <?php
-class UserProvider {
     public function findAll(): array {
         $find = function () {
             return $this->entityManager->getRepository(User::class)
@@ -262,6 +268,54 @@ class UserProvider {
         };
         return $this->cacheProvider
             ->getOrRefresh('users', $find, $serialize, $unserialize);
+}
+
+```
+
+## Провайдер данных Key-Value, обработка
+{:.fullscreen}
+```php
+<?php
+
+class User implements Serializable {
+
+    public function serialize() {
+        return json_encode([
+            'id' => $this->getId(),
+            'username' => $this->getUsername(),
+        ]);
+    }
+
+    public function unserialize($serialized) {
+        $values = (array) json_decode($serialized);
+        $this->setId($values['id']);
+        $this->setUsername($values['username']);
+    }
+}
+```
+
+## Провайдер данных Key-Value, getOrRefresh
+{:.fullscreen}
+```php
+<?php
+
+class KeyvalueProvider {
+    public function getOrRefresh(
+      String $key,
+      Closure $find,
+      Closure $serialize,
+      Closure $unserialize
+  ) {
+        $item = $this->adapter->getItem($key);
+        if (!$this->adapter->hasItem($key)) {
+            $result = $find();
+            $this->adapter->save(
+                $item->set($serialize($result))
+            );
+        } else {
+            $result = $unserialize($item->get());
+        }
+        return $result;
     }
 }
 ```
