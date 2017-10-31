@@ -28,7 +28,7 @@ style: |
 {% endif %}
 </div>
 
-## Цели
+## Цель
 
 **Использовать только одну базу данных в приложении**
 
@@ -108,6 +108,49 @@ style: |
 ## Реализация
 {:.section}
 
+## docker-compose.yml, dbs
+{:.fullscreen}
+```
+services:
+    keyvalue:
+        image: postgres:10
+        environment:
+            POSTGRES_PASSWORD: keyvalue
+            POSTGRES_USER: keyvalue
+        hostname: keyvalue
+    orm:
+        image: postgres:10
+        environment:
+            POSTGRES_PASSWORD: orm
+            POSTGRES_USER: orm
+        hostname: orm
+    odm:
+        image: postgres:10
+        environment:
+            POSTGRES_PASSWORD: odm
+            POSTGRES_USER: odm
+        hostname: odm
+```
+
+## docker-compose.yml, front + back
+{:.fullscreen}
+```
+services:
+    back:
+        build: ./php-fpm
+        depends_on: ["keyvalue", "odm", "orm"]
+        ports:
+            - "9000:9000"
+        volumes:
+            - ./../symfony:/usr/share/symfony
+    front:
+        build: ./nginx
+        depends_on: ["back"]
+        hostname: front
+        volumes_from:
+            - back
+```
+
 ## Message queue
 
 **MQ-сервис только на базе postgres+php - пока рано**{:.slide-red.next}
@@ -186,9 +229,7 @@ doctrine:
 /** @ORM\Entity @ORM\Table */
 class User
 {
-    /**
-     * @ORM\Id @ORM\GeneratedValue(strategy="AUTO")
-     */
+    /** @ORM\Id @ORM\GeneratedValue(strategy="AUTO") */
     protected $id;
 
     /** @ORM\Column(unique=true) */
