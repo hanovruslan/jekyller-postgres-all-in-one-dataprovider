@@ -306,7 +306,7 @@ class UserProvider {
         };
         return $this->cacheProvider
             ->getOrRefresh('users', $find, $serialize, $unserialize);
-
+    }
 ```
 
 ## Провайдер данных Key-Value, обработка
@@ -344,13 +344,13 @@ class KeyvalueProvider {
       Closure $unserialize
   ) {
         $item = $this->adapter->getItem($key);
-        if (!$this->adapter->hasItem($key)) {
+        if ($this->adapter->hasItem($key)) {
+            $result = $unserialize($item->get());
+        } else {
             $result = $find();
             $this->adapter->save(
                 $item->set($serialize($result))
             );
-        } else {
-            $result = $unserialize($item->get());
         }
         return $result;
     }
@@ -360,19 +360,24 @@ class KeyvalueProvider {
 ## Заключение
 {:.section}
 
-## Замечания
+## Что имеем
+
+**Традиционные SQL данные**
+
+**Key-Value - в формате blob**
+
+**NoSQL- в формате jsonb**
+
+## Плюсы
+
+1. {:.next}Много готовых решений
+1. {:.next}Быстро подключается
+
+## Минусы
 
 1. {:.next}Предсказуемо работает только ORM
 1. {:.next}Полнота функционала только ORM
 1. {:.next}Путаница в параметрах при работе с несколькими Entity Manager
-
-## Что имеем
-
-**традиционные sql данные**
-
-**nosql - в формате jsonb**
-
-**cache - в формате blob**
 
 ## В основе все равно остаётся схема
 {:.blockquote}
